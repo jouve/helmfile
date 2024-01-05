@@ -19,6 +19,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/go-getter"
 	"github.com/hashicorp/go-getter/helper/url"
+	"github.com/moby/locker"
 	"go.uber.org/zap"
 
 	"github.com/helmfile/helmfile/pkg/envvar"
@@ -63,6 +64,8 @@ type Remote struct {
 	// Filesystem abstraction
 	// Inject any implementation of your choice, like an im-memory impl for testing, os.ReadFile for the real-world use.
 	fs *filesystem.FileSystem
+
+	locker *locker.Locker
 }
 
 // Locate takes an URL to a remote file or a path to a local file.
@@ -240,6 +243,9 @@ func (r *Remote) Fetch(path string, cacheDirOpt ...string) (string, error) {
 	r.Logger.Debugf("remote> home: %s", r.Home)
 	r.Logger.Debugf("remote> getter dest: %s", getterDst)
 	r.Logger.Debugf("remote> cached dir: %s", cacheDirPath)
+
+	r.locker.Lock(cacheDirPath)
+	defer r.locker.Unlock(cacheDirPath)
 
 	{
 		if r.fs.FileExistsAt(cacheDirPath) {
@@ -542,6 +548,7 @@ func NewRemote(logger *zap.SugaredLogger, homeDir string, fs *filesystem.FileSys
 		S3Getter:   &S3Getter{Logger: logger},
 		HttpGetter: &HttpGetter{Logger: logger},
 		fs:         fs,
+		locker:     locker.New(),
 	}
 
 	if remote.Home == "" {

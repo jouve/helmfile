@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/moby/locker"
 
 	"github.com/helmfile/helmfile/pkg/helmexec"
 	"github.com/helmfile/helmfile/pkg/testhelper"
@@ -56,6 +57,7 @@ func TestRemote_HttpsGitHub(t *testing.T) {
 				Home:   CacheDir(),
 				Getter: getter,
 				fs:     testfs.ToFileSystem(),
+				locker: locker.New(),
 			}
 
 			// FYI, go-getter in the `dir` mode accepts URL like the below. So helmfile expects URLs similar to it:
@@ -129,6 +131,7 @@ func TestRemote_SShGitHub(t *testing.T) {
 				Home:   CacheDir(),
 				Getter: getter,
 				fs:     testfs.ToFileSystem(),
+				locker: locker.New(),
 			}
 
 			url := "git::ssh://git@github.com/helmfile/helmfiles.git@releases/kiam.yaml?ref=0.40.0"
@@ -196,6 +199,7 @@ func TestRemote_SShGitHub_WithSshKey(t *testing.T) {
 				Home:   CacheDir(),
 				Getter: getter,
 				fs:     testfs.ToFileSystem(),
+				locker: locker.New(),
 			}
 
 			url := "git::ssh://git@github.com/helmfile/helmfiles.git@releases/kiam.yaml?ref=0.40.0&sshkey=ZWNkc2Etc2hhMi1uaXN0cDI1NiBBQUFBRTJWalpITmhMWE5vWVRJdGJtbHpkSEF5TlRZQUFBQUlibWx6ZEhBeU5UWUFBQUJCQkJTU3dOY2xoVzQ2Vm9VR3dMQ3JscVRHYUdOVWdRVUVEUEptc1ZzdUViL2RBNUcrQk9YMWxGaUVMYU9HQ2F6bS9KQkR2V3Y2Y0ZDQUtVRjVocVJOUjdJPSA="
@@ -265,6 +269,7 @@ func TestRemote_S3(t *testing.T) {
 				S3Getter:   getter,
 				HttpGetter: getter,
 				fs:         testfs.ToFileSystem(),
+				locker:     locker.New(),
 			}
 
 			url := "s3://helm-s3-values-example/subdir/values.yaml"
@@ -478,6 +483,7 @@ func TestRemote_Fetch(t *testing.T) {
 				Home:   CacheDir(),
 				Getter: getter,
 				fs:     testfs.ToFileSystem(),
+				locker: locker.New(),
 			}
 
 			url := "git::https://github.com/helmfile/helmfile.git@README.md?ref=v0.151.0"
